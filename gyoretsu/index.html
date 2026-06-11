@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="description" content="ツーボックス公式ミニゲーム「行列パンク大作戦」。スタッフを配置して受付の行列をさばき、パンクを阻止しよう！">
+<title>行列パンク大作戦｜tsubox</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=M+PLUS+Rounded+1c:wght@700;800&family=Montserrat:wght@700;800&display=swap');
+
+:root{
+  --tsubox-blue:#0091E0;
+  --tsubox-blue-600:#007BC0;
+  --tsubox-blue-700:#0062A0;
+  --tsubox-blue-300:#7FC7F0;
+  --tsubox-blue-200:#BFE3F7;
+  --tsubox-blue-100:#E0F0FA;
+  --tsubox-blue-050:#F1F8FD;
+  --tsubox-red:#E50020;
+  --ink-100:#E8EAEE;
+  --ink-200:#D3D7DD;
+  --ink-400:#858B96;
+  --ink-600:#3C4148;
+  --ink-800:#15171A;
+  --font-jp:'Noto Sans JP','Hiragino Kaku Gothic Pro','Yu Gothic',sans-serif;
+  --font-round:'M PLUS Rounded 1c','Noto Sans JP',sans-serif;
+  --font-display:'Montserrat','Noto Sans JP',sans-serif;
+  --shadow-sm:0 2px 6px rgba(12,20,30,.06),0 1px 2px rgba(12,20,30,.04);
+  --shadow-md:0 6px 18px rgba(12,20,30,.08),0 2px 4px rgba(12,20,30,.04);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:var(--tsubox-blue-050);
+  font-family:var(--font-jp);
+  color:var(--ink-800);
+  display:flex;justify-content:center;
+  overflow:hidden;
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+  touch-action:manipulation;
+}
+#app{
+  width:100%;max-width:430px;height:100dvh;
+  background:#fff;position:relative;overflow:hidden;
+  box-shadow:0 0 40px rgba(0,98,160,.10);
+  display:flex;flex-direction:column;
+}
+.screen{display:none;flex-direction:column;height:100%;position:relative;overflow:hidden}
+.screen.active{display:flex}
+
+.eyebrow{
+  font-family:var(--font-display);font-weight:700;font-size:11px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--tsubox-blue);
+}
+.tsubox-rule{
+  height:2px;width:200px;margin:10px auto 0;
+  background:linear-gradient(to right,var(--tsubox-blue) 0,var(--tsubox-blue) 40px,var(--ink-200) 40px,var(--ink-200) 100%);
+}
+.btn{
+  font-family:var(--font-round);font-weight:800;font-size:18px;
+  border:none;cursor:pointer;border-radius:999px;
+  padding:16px 48px;color:#fff;background:var(--tsubox-blue);
+  box-shadow:var(--shadow-md);transition:background .18s, transform .12s;
+  letter-spacing:.04em;
+}
+.btn:hover{background:var(--tsubox-blue-600)}
+.btn:active{background:var(--tsubox-blue-700);transform:translateY(1px)}
+.btn-ghost{
+  background:#fff;color:var(--tsubox-blue);border:2px solid var(--tsubox-blue-200);
+  box-shadow:var(--shadow-sm);font-size:15px;padding:12px 32px;
+}
+.btn-ghost:hover{background:var(--tsubox-blue-050)}
+.btn-ghost:active{background:var(--tsubox-blue-100)}
+
+/* ============ タイトル ============ */
+#screen-title{
+  align-items:center;justify-content:center;gap:12px;
+  padding:20px 20px calc(16px + env(safe-area-inset-bottom));
+  overflow-y:auto;
+  background:
+    radial-gradient(circle at 12% 18%, var(--tsubox-blue-050) 0 56px, transparent 57px),
+    radial-gradient(circle at 88% 30%, var(--tsubox-blue-050) 0 42px, transparent 43px),
+    radial-gradient(circle at 18% 78%, var(--tsubox-blue-050) 0 48px, transparent 49px),
+    radial-gradient(circle at 86% 84%, var(--tsubox-blue-050) 0 38px, transparent 39px),
+    #fff;
+}
+#screen-title .logo{width:110px;display:block;flex:none}
+#title-h1{
+  font-family:var(--font-round);font-weight:800;font-size:32px;
+  color:var(--tsubox-blue-700);line-height:1.2;text-align:center;
+}
+#title-h1 small{display:block;font-size:14px;color:var(--ink-400);font-weight:700;margin-bottom:4px}
+.title-chars{display:flex;gap:18px;align-items:flex-end;margin:2px 0}
+.howto{
+  background:var(--tsubox-blue-050);border:1px solid var(--tsubox-blue-100);
+  border-radius:14px;padding:13px 16px;width:100%;max-width:340px;flex:none;
+}
+.howto h2{font-size:13px;color:var(--tsubox-blue-700);margin-bottom:8px;letter-spacing:.08em}
+.howto ol{list-style:none;display:flex;flex-direction:column;gap:7px}
+.howto li{font-size:13px;line-height:1.55;color:var(--ink-600);display:flex;gap:8px}
+.howto li b{color:var(--tsubox-blue-700)}
+.howto li .red{color:var(--tsubox-red);font-weight:700}
+.howto .num{
+  flex:none;width:20px;height:20px;border-radius:50%;background:var(--tsubox-blue);
+  color:#fff;font-family:var(--font-display);font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;margin-top:2px;
+}
+#best-line{font-size:13px;color:var(--ink-400);font-weight:500}
+#best-line b{color:var(--tsubox-blue-700);font-family:var(--font-display);font-size:16px}
+.other-game{
+  font-size:13px;font-weight:700;color:var(--tsubox-blue);
+  text-decoration:none;border:1.5px solid var(--tsubox-blue-200);border-radius:999px;
+  padding:7px 20px;background:#fff;box-shadow:var(--shadow-sm);
+}
+.site-footer{font-size:11px;color:var(--ink-400);text-align:center;line-height:1.7}
+.site-footer a{color:var(--tsubox-blue);text-decoration:none}
+
+/* ============ ゲーム画面 ============ */
+#screen-game{background:#fff}
+#hud{
+  padding:calc(8px + env(safe-area-inset-top)) 14px 6px;
+  display:flex;align-items:center;gap:10px;background:#fff;
+  border-bottom:1px solid var(--ink-100);flex:none;
+}
+#hearts{display:flex;gap:3px}
+#hearts svg{width:24px;height:24px}
+#hud .score-box{flex:1;text-align:center}
+#hud .score-label{font-family:var(--font-display);font-size:9px;letter-spacing:.14em;color:var(--ink-400);font-weight:700}
+#hud .score-num{font-family:var(--font-display);font-weight:800;font-size:22px;color:var(--tsubox-blue-700);line-height:1.1;font-variant-numeric:tabular-nums}
+#hud .score-num small{font-size:12px;color:var(--ink-400);font-weight:700}
+#hud .time-box{text-align:right;min-width:52px}
+#hud .time-num{font-family:var(--font-display);font-weight:800;font-size:18px;color:var(--ink-600);font-variant-numeric:tabular-nums}
+#mute-btn{
+  border:1px solid var(--ink-100);background:#fff;border-radius:50%;
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--ink-400);flex:none;
+}
+
+#field{flex:1;position:relative;overflow:hidden;background:linear-gradient(180deg,#fff 0%,var(--tsubox-blue-050) 100%)}
+#field.flash::after{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:30;
+  box-shadow:inset 0 0 0 6px var(--tsubox-red);animation:flashFade .5s forwards;
+}
+@keyframes flashFade{from{opacity:1}to{opacity:0}}
+
+#entrance{
+  position:absolute;top:0;left:0;right:0;height:34px;z-index:3;
+  background:var(--tsubox-blue-700);color:#fff;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+#entrance .ent-label{font-family:var(--font-round);font-weight:800;font-size:13px;letter-spacing:.2em}
+#entrance .ent-sub{font-family:var(--font-display);font-weight:700;font-size:9px;letter-spacing:.22em;opacity:.7}
+
+.lane-sep{position:absolute;top:34px;bottom:0;width:1px;background:var(--ink-100);z-index:1}
+.lane-zone{position:absolute;top:34px;bottom:0;z-index:2}
+.lane-zone.danger{animation:dangerBlink .7s infinite}
+@keyframes dangerBlink{0%,100%{background:transparent}50%{background:rgba(229,0,32,.07)}}
+.lane-block{
+  position:absolute;z-index:14;display:none;pointer-events:none;
+  filter:drop-shadow(0 2px 3px rgba(12,20,30,.18));
+}
+.lane-block.on{display:block;animation:blockPop .25s cubic-bezier(.22,.61,.36,1)}
+@keyframes blockPop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+
+.desk{
+  position:absolute;z-index:10;border-radius:8px;
+  background:#fff;border:2.5px solid var(--tsubox-blue-700);
+  box-shadow:var(--shadow-sm);
+}
+.desk::after{
+  content:'';position:absolute;left:0;right:0;top:0;height:7px;
+  background:var(--tsubox-blue);border-radius:5px 5px 0 0;
+}
+.desk .desk-label{
+  position:absolute;left:0;right:0;bottom:2px;text-align:center;
+  font-family:var(--font-display);font-weight:700;font-size:9px;color:var(--tsubox-blue-700);
+  letter-spacing:.1em;
+}
+.desk.empty-desk{border-color:var(--ink-200);opacity:.75}
+.desk.empty-desk::after{background:var(--ink-200)}
+
+.visitor-mini{
+  position:absolute;z-index:5;width:38px;
+  transition:top .42s cubic-bezier(.22,.61,.36,1), left .42s cubic-bezier(.22,.61,.36,1), opacity .3s;
+  will-change:top,left;
+}
+.visitor-mini .bob{animation:floaty 2.4s ease-in-out infinite}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+.staff{
+  position:absolute;z-index:12;width:50px;cursor:pointer;
+  transition:top .6s cubic-bezier(.22,.61,.36,1), left .6s cubic-bezier(.22,.61,.36,1);
+  will-change:top,left;
+}
+.staff .staff-inner{animation:workBob 1.1s ease-in-out infinite;transform-origin:bottom center}
+@keyframes workBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.staff.sel{z-index:13}
+.staff.sel::before{
+  content:'';position:absolute;inset:-7px;border-radius:50%;
+  border:3px dashed var(--tsubox-blue);animation:selSpin 3s linear infinite;
+}
+@keyframes selSpin{to{transform:rotate(360deg)}}
+.staff.sel .staff-inner{animation:selBounce .5s ease-in-out infinite}
+@keyframes selBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.staff.moving{opacity:.85}
+.staff.moving .staff-inner{animation:none;transform:rotate(-6deg)}
+
+.float-pts{
+  position:absolute;z-index:18;pointer-events:none;
+  font-family:var(--font-display);font-weight:800;font-size:15px;color:var(--tsubox-blue);
+  animation:rise .65s ease-out forwards;text-shadow:0 1px 0 #fff;
+}
+.float-pts.penalty{color:var(--tsubox-red);font-size:17px;font-family:var(--font-round)}
+@keyframes rise{from{transform:translateY(0);opacity:1}to{transform:translateY(-44px);opacity:0}}
+
+#banner{
+  position:absolute;top:46px;left:50%;transform:translateX(-50%) scale(.7);z-index:20;
+  background:var(--tsubox-red);color:#fff;font-family:var(--font-round);font-weight:800;
+  font-size:15px;padding:7px 22px;border-radius:999px;box-shadow:var(--shadow-md);
+  opacity:0;pointer-events:none;white-space:nowrap;
+}
+#banner.show{animation:bannerIn 2.2s cubic-bezier(.22,.61,.36,1) forwards}
+#banner.info{background:var(--tsubox-blue)}
+@keyframes bannerIn{0%{opacity:0;transform:translateX(-50%) scale(.7)}12%{opacity:1;transform:translateX(-50%) scale(1.05)}18%{transform:translateX(-50%) scale(1)}85%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(.95)}}
+
+#bottombar{
+  flex:none;display:flex;align-items:center;gap:10px;
+  padding:8px 12px calc(10px + env(safe-area-inset-bottom));
+  background:#fff;border-top:1px solid var(--ink-100);
+}
+#hint{
+  flex:1;font-size:12px;font-weight:700;color:var(--ink-400);line-height:1.4;
+}
+#hint.active{color:var(--tsubox-blue-700)}
+#partition-btn{
+  flex:none;display:flex;align-items:center;gap:8px;
+  font-family:var(--font-round);font-weight:800;font-size:13px;
+  border:2px solid var(--tsubox-blue);background:#fff;color:var(--tsubox-blue-700);
+  border-radius:999px;padding:9px 16px;cursor:pointer;box-shadow:var(--shadow-sm);
+  transition:background .15s,opacity .15s;position:relative;overflow:hidden;
+}
+#partition-btn:active{background:var(--tsubox-blue-050)}
+#partition-btn:disabled{border-color:var(--ink-200);color:var(--ink-400);cursor:default}
+#partition-btn .cd{
+  position:absolute;left:0;top:0;bottom:0;background:var(--ink-100);z-index:-0;
+  opacity:.6;width:0%;
+}
+#partition-btn span{position:relative;z-index:1}
+
+/* ============ リザルト ============ */
+#screen-result{
+  align-items:center;justify-content:center;gap:11px;
+  padding:22px 22px calc(16px + env(safe-area-inset-bottom));text-align:center;
+  overflow-y:auto;
+}
+#result-rank{font-family:var(--font-round);font-weight:800;font-size:30px;color:var(--tsubox-blue-700);line-height:1.25}
+#result-score{font-family:var(--font-display);font-weight:800;font-size:54px;color:var(--ink-800);line-height:1;font-variant-numeric:tabular-nums}
+#result-score small{font-size:16px;color:var(--ink-400);font-weight:700;margin-left:4px}
+#result-newbest{
+  font-family:var(--font-round);font-weight:800;color:var(--tsubox-red);font-size:15px;
+  visibility:hidden;animation:nbPulse .4s ease-out .2s 2;
+}
+@keyframes nbPulse{0%{transform:scale(1)}50%{transform:scale(1.16)}100%{transform:scale(1)}}
+.result-stats{display:flex;gap:10px;width:100%;max-width:330px}
+.result-stats .stat{flex:1;background:var(--tsubox-blue-050);border:1px solid var(--tsubox-blue-100);border-radius:12px;padding:10px 4px}
+.result-stats .stat .v{font-family:var(--font-display);font-weight:800;font-size:20px;color:var(--tsubox-blue-700)}
+.result-stats .stat .k{font-size:10.5px;color:var(--ink-400);font-weight:700;margin-top:2px}
+#result-msg{font-size:13.5px;line-height:1.8;color:var(--ink-600);max-width:320px}
+.result-btns{display:flex;flex-direction:column;gap:10px;margin-top:4px;align-items:center}
+#result-chars{display:flex;gap:12px;align-items:flex-end}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== タイトル ===== -->
+  <section id="screen-title" class="screen active">
+    <img class="logo" src="../tsubox_logo.png" alt="tsubox">
+    <div class="eyebrow">TSUBOX MINI GAME 02</div>
+    <h1 id="title-h1"><small>列をあふれさせるな！</small>行列パンク大作戦</h1>
+    <div class="tsubox-rule"></div>
+    <div class="title-chars" id="title-chars"></div>
+    <div class="howto">
+      <h2>あそびかた</h2>
+      <ol>
+        <li><span class="num">1</span><span><b>スタッフをタップ → レーンをタップ</b>で配置がえ。スタッフがいるレーンだけ受付が進む</span></li>
+        <li><span class="num">2</span><span>来場者はどんどん増える。列を先読みしてさばこう</span></li>
+        <li><span class="num">3</span><span>満員の列にお客様が来ると<span class="red">パンク！</span>ハートが3つなくなったら終了</span></li>
+        <li><span class="num">4</span><span>ピンチの時は<b>ベルトパーテーション</b>で一番長い列を一時ストップ</span></li>
+      </ol>
+    </div>
+    <div id="best-line"></div>
+    <button class="btn" id="start-btn">スタート</button>
+    <a class="other-game" href="../">第1弾「爆速受付チャレンジ」であそぶ</a>
+    <div class="site-footer">
+      &copy; 有限会社ツーボックス｜<a href="https://www.tsu-box.com/" target="_blank" rel="noopener">tsu-box.com</a>
+    </div>
+  </section>
+
+  <!-- ===== ゲーム ===== -->
+  <section id="screen-game" class="screen">
+    <div id="hud">
+      <div id="hearts"></div>
+      <div class="score-box">
+        <div class="score-label">ご案内した人数</div>
+        <div class="score-num"><span id="score-num">0</span><small> 人</small></div>
+      </div>
+      <div class="time-box"><div class="time-num" id="time-num">0:00</div></div>
+      <button id="mute-btn" aria-label="サウンド切替"></button>
+    </div>
+    <div id="field">
+      <div id="entrance"><span class="ent-label">入口</span><span class="ent-sub">ENTRANCE</span></div>
+      <div id="banner"></div>
+    </div>
+    <div id="bottombar">
+      <div id="hint">スタッフをタップ → レーンをタップで配置がえ</div>
+      <button id="partition-btn"><div class="cd"></div><span id="partition-label">パーテーション</span></button>
+    </div>
+  </section>
+
+  <!-- ===== リザルト ===== -->
+  <section id="screen-result" class="screen">
+    <div class="eyebrow">RESULT</div>
+    <div class="tsubox-rule" style="margin-top:2px"></div>
+    <div id="result-rank"></div>
+    <div id="result-score"></div>
+    <div id="result-newbest">ベスト記録更新！</div>
+    <div class="result-stats">
+      <div class="stat"><div class="v" id="stat-time">0:00</div><div class="k">もちこたえた時間</div></div>
+      <div class="stat"><div class="v" id="stat-wave">0</div><div class="k">団体さん対応</div></div>
+      <div class="stat"><div class="v" id="stat-max">0</div><div class="k">最大同時行列</div></div>
+    </div>
+    <div id="result-chars"></div>
+    <div id="result-msg"></div>
+    <div class="result-btns">
+      <button class="btn" id="retry-btn">もういちど</button>
+      <button class="btn btn-ghost" id="title-btn">タイトルへ</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+
+/* ====================== キャラクターSVG ====================== */
+function ghostSVG(variant, size, angry){
+  const c = variant === 'b'
+    ? {body:'#C2E4F8', line:'#2B5C84', blush:'#9ED4F4', eye:'#26425C'}
+    : {body:'#F9D2DC', line:'#A8506C', blush:'#F5A9BE', eye:'#4F2733'};
+  const face = angry
+    ? `<line x1="72" y1="58" x2="90" y2="66" stroke="${c.eye}" stroke-width="4" stroke-linecap="round"/>
+       <line x1="128" y1="58" x2="110" y2="66" stroke="${c.eye}" stroke-width="4" stroke-linecap="round"/>
+       <circle cx="84" cy="76" r="6.5" fill="${c.eye}"/>
+       <circle cx="116" cy="76" r="6.5" fill="${c.eye}"/>
+       <path d="M90 96 Q100 88 110 96" fill="none" stroke="${c.eye}" stroke-width="4" stroke-linecap="round"/>`
+    : `<circle class="g-eye" cx="82" cy="73" r="6.5" fill="${c.eye}"/>
+       <circle class="g-eye" cx="118" cy="73" r="6.5" fill="${c.eye}"/>
+       <path d="M92 89 Q100 97 108 89" fill="none" stroke="${c.eye}" stroke-width="4" stroke-linecap="round"/>`;
+  return `
+  <svg viewBox="0 0 200 215" width="${size}" height="${Math.round(size*1.075)}" aria-hidden="true">
+    <ellipse cx="100" cy="205" rx="52" ry="8" fill="rgba(43,92,132,.10)"/>
+    <ellipse cx="24" cy="112" rx="15" ry="11" transform="rotate(-28 24 112)"
+      fill="${c.body}" stroke="${c.line}" stroke-width="5"/>
+    <ellipse cx="176" cy="112" rx="15" ry="11" transform="rotate(28 176 112)"
+      fill="${c.body}" stroke="${c.line}" stroke-width="5"/>
+    <path fill="${c.body}" stroke="${c.line}" stroke-width="5" stroke-linejoin="round" d="
+      M100 12
+      C 60 12 36 46 36 94
+      L 36 152
+      Q 40 170 52 168 Q 61 166 64 156
+      Q 70 175 84 172 Q 93 170 96 158
+      Q 102 177 116 173 Q 125 170 128 158
+      Q 134 176 148 171 Q 159 167 164 152
+      L 164 94
+      C 164 46 140 12 100 12 Z"/>
+    <ellipse cx="74" cy="38" rx="16" ry="9" transform="rotate(-18 74 38)" fill="rgba(255,255,255,.65)"/>
+    <ellipse cx="100" cy="78" rx="47" ry="41" fill="#FFFFFF" stroke="${c.line}" stroke-width="5"/>
+    ${face}
+    <ellipse cx="72" cy="88" rx="8.5" ry="5" fill="${c.blush}"/>
+    <ellipse cx="128" cy="88" rx="8.5" ry="5" fill="${c.blush}"/>
+  </svg>`;
+}
+
+/* スーツ姿のツーボックススタッフ（添付キャラ準拠：眼鏡＋オレンジのネクタイ/リボン） */
+function staffSVG(gender, size){
+  const suit = '#2B3A55', suitLine = '#1C2638', skin = '#FFE0C2',
+        hair = gender==='m' ? '#4A3528' : '#5C4030', orange = '#F08300';
+  const hairPath = gender==='m'
+    ? `<path d="M16 21 Q15 5 30 5 Q45 5 44 21 Q39 11 30 11 Q21 11 16 21 Z" fill="${hair}" stroke="${suitLine}" stroke-width="2"/>`
+    : `<path d="M14 24 Q13 4 30 4 Q47 4 46 24 L46 34 Q46 40 41 38 L41 22 Q36 12 30 12 Q24 12 19 22 L19 38 Q14 40 14 34 Z" fill="${hair}" stroke="${suitLine}" stroke-width="2"/>
+       <circle cx="43" cy="16" r="4.5" fill="${orange}" stroke="${suitLine}" stroke-width="1.5"/>`;
+  return `
+  <svg viewBox="0 0 60 76" width="${size}" height="${Math.round(size*76/60)}" aria-hidden="true">
+    <ellipse cx="30" cy="73" rx="18" ry="3" fill="rgba(43,92,132,.12)"/>
+    <path d="M14 72 L18 46 Q30 40 42 46 L46 72 Z" fill="${suit}" stroke="${suitLine}" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M26 45 L30 52 L34 45 Z" fill="#fff"/>
+    <path d="M28.6 48 L30 58 L31.4 48 Z" fill="${orange}"/>
+    <ellipse cx="14" cy="56" rx="5" ry="8" fill="${suit}" stroke="${suitLine}" stroke-width="2"/>
+    <ellipse cx="46" cy="56" rx="5" ry="8" fill="${suit}" stroke="${suitLine}" stroke-width="2"/>
+    <circle cx="30" cy="22" r="14.5" fill="${skin}" stroke="${suitLine}" stroke-width="2.5"/>
+    ${hairPath}
+    <rect x="17.5" y="19" width="10" height="8" rx="2.5" fill="none" stroke="${suitLine}" stroke-width="2"/>
+    <rect x="32.5" y="19" width="10" height="8" rx="2.5" fill="none" stroke="${suitLine}" stroke-width="2"/>
+    <line x1="27.5" y1="22" x2="32.5" y2="22" stroke="${suitLine}" stroke-width="2"/>
+    <circle cx="22.5" cy="23" r="1.8" fill="${suitLine}"/>
+    <circle cx="37.5" cy="23" r="1.8" fill="${suitLine}"/>
+    <path d="M26 31 Q30 34 34 31" fill="none" stroke="${suitLine}" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function heartSVG(on){
+  return `<svg viewBox="0 0 24 24"><path d="M12 21 C5 15 2 11.5 2 8 a5 5 0 0 1 10-1 a5 5 0 0 1 10 1 c0 3.5-3 7-10 13Z"
+    fill="${on ? '#E50020' : '#E8EAEE'}" stroke="${on ? '#C40018' : '#D3D7DD'}" stroke-width="1.5"/></svg>`;
+}
+
+function beltSVG(w){
+  return `
+  <svg viewBox="0 0 100 30" width="${w}" height="${Math.round(w*0.3)}" aria-hidden="true">
+    <path d="M10 8 Q 50 22 90 8" fill="none" stroke="#0091E0" stroke-width="6"/>
+    <rect x="4" y="2" width="9" height="26" rx="4.5" fill="#0091E0" stroke="#0062A0" stroke-width="1.5"/>
+    <rect x="87" y="2" width="9" height="26" rx="4.5" fill="#0091E0" stroke="#0062A0" stroke-width="1.5"/>
+  </svg>`;
+}
+
+/* ====================== サウンド ====================== */
+let actx = null;
+let muted = localStorage.getItem('tsubox_uketsuke_mute') === '1';
+function ensureAudio(){
+  if(!actx){
+    try{ actx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ actx = null; }
+  }
+  if(actx && actx.state === 'suspended') actx.resume();
+}
+function beep(freq, dur=0.08, type='sine', gain=0.06, delay=0){
+  if(muted || !actx) return;
+  const t = actx.currentTime + delay;
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(gain, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(actx.destination);
+  o.start(t); o.stop(t + dur + 0.02);
+}
+const sfx = {
+  process(){ beep(620,.06,'sine',.05); beep(830,.07,'sine',.045,.05); },
+  select(){ beep(740,.05,'sine',.05); },
+  place(){ beep(440,.07,'sine',.055); beep(550,.08,'sine',.05,.06); },
+  pank(){ beep(220,.16,'square',.05); beep(150,.24,'square',.05,.12); },
+  wave(){ beep(523,.1,'triangle',.06); beep(659,.14,'triangle',.06,.1); },
+  partition(){ beep(880,.06,'sine',.05); beep(660,.1,'sine',.05,.06); },
+  start(){ beep(523,.09,'sine',.06); beep(659,.09,'sine',.06,.1); beep(784,.14,'sine',.07,.2); },
+  end(){ beep(784,.1,'sine',.06); beep(659,.1,'sine',.06,.11); beep(523,.2,'sine',.07,.22); }
+};
+function renderMuteBtn(){
+  $('#mute-btn').innerHTML = muted
+    ? `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`
+    : `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>`;
+}
+
+/* ====================== 定数 ====================== */
+const LANE_N = 4;
+const CAP = 7;
+const PROC_MS = 1000;
+const SPAWN_START = 2200;
+const SPAWN_DECAY = 0.985;
+const SPAWN_MIN = 520;
+const WAVE_EVERY = 25000;
+const BLOCK_MS = 6000;
+const BLOCK_CD = 18000;
+const TICK_MS = 60;
+
+const RANKS = [
+  {min:190, name:'伝説のイベンター', msg:'神がかったオペレーションです。どんな大行列もあなたの前では無力。ツーボックスが全力でスカウトしたい逸材です。'},
+  {min:130, name:'現場監督',         msg:'お見事です。スタッフの動かし方が完全にプロの域。大型イベントの現場をぜひお任せしたい腕前です。'},
+  {min:80,  name:'フロアリーダー',   msg:'素晴らしいさばきでした。列の伸びを先読みできています。パーテーションをうまく使えばさらに上へ。'},
+  {min:40,  name:'受付スタッフ',     msg:'順調です。スタッフは「いま長い列」より「これから伸びる列」へ。先回りの配置がコツです。'},
+  {min:0,   name:'研修中スタッフ',   msg:'行列さばきはスタッフ配置が9割です。空いているレーンにもお客様は並びます。こまめな配置がえを意識してみましょう。'}
+];
+
+/* ====================== 状態 ====================== */
+let state = null;
+let timerId = null;
+let geo = null;
+
+function newVisitorChar(){ return Math.random() < .5 ? 'b' : 'p'; }
+
+function show(name){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $('#screen-' + name).classList.add('active');
+}
+
+/* ====================== レイアウト ====================== */
+function computeGeo(){
+  const f = $('#field');
+  const W = f.clientWidth, H = f.clientHeight;
+  const laneW = W / LANE_N;
+  const entH = 34;
+  const deskH = 30, deskTop = H - 96;
+  const slotGap = Math.min(38, Math.max(26, (deskTop - 46 - entH - 40) / (CAP - 1)));
+  geo = {
+    W, H, laneW, entH, deskTop, deskH, slotGap,
+    laneX: i => laneW * (i + .5),
+    slotPos: (lane, idx) => ({
+      left: laneW * (lane + .5) - 19,
+      top: deskTop - 46 - idx * slotGap
+    }),
+    staffPos: lane => ({
+      left: laneW * (lane + .5) - 25,
+      top: deskTop + deskH - 4
+    })
+  };
+}
+
+function buildField(){
+  const f = $('#field');
+  f.querySelectorAll('.lane-sep,.lane-zone,.desk,.visitor-mini,.staff,.lane-block,.float-pts').forEach(e => e.remove());
+  computeGeo();
+  for(let i = 1; i < LANE_N; i++){
+    const sep = document.createElement('div');
+    sep.className = 'lane-sep';
+    sep.style.left = (geo.laneW * i) + 'px';
+    f.appendChild(sep);
+  }
+  for(let i = 0; i < LANE_N; i++){
+    const zone = document.createElement('div');
+    zone.className = 'lane-zone';
+    zone.dataset.lane = i;
+    zone.style.left = (geo.laneW * i) + 'px';
+    zone.style.width = geo.laneW + 'px';
+    f.appendChild(zone);
+
+    const desk = document.createElement('div');
+    desk.className = 'desk';
+    desk.dataset.lane = i;
+    desk.style.left = (geo.laneX(i) - geo.laneW * .36) + 'px';
+    desk.style.top = geo.deskTop + 'px';
+    desk.style.width = (geo.laneW * .72) + 'px';
+    desk.style.height = geo.deskH + 'px';
+    desk.innerHTML = `<div class="desk-label">0${i+1}</div>`;
+    f.appendChild(desk);
+
+    const block = document.createElement('div');
+    block.className = 'lane-block';
+    block.dataset.lane = i;
+    const bw = Math.round(geo.laneW * .86);
+    block.style.left = (geo.laneX(i) - bw/2) + 'px';
+    block.style.top = (geo.entH + 4) + 'px';
+    block.innerHTML = beltSVG(bw);
+    f.appendChild(block);
+  }
+}
+
+/* ====================== ゲーム進行 ====================== */
+function startGame(){
+  ensureAudio();
+  show('game');
+  buildField();
+  const now = Date.now();
+  state = {
+    over:false, startTime:now, score:0, hearts:3,
+    lanes: Array.from({length:LANE_N}, () => ({queue:[], blockedUntil:0})),
+    staffs: [
+      {id:0, gender:'m', lane:0, state:'idle', moveEnd:0, procAt:now+600, el:null},
+      {id:1, gender:'f', lane:1, state:'idle', moveEnd:0, procAt:now+800, el:null},
+      {id:2, gender:'m', lane:2, state:'idle', moveEnd:0, procAt:now+1000, el:null}
+    ],
+    selected:null,
+    spawnAt: now + 1200,
+    spawnInterval: SPAWN_START,
+    nextWaveAt: now + WAVE_EVERY,
+    waveCount:0, pending:[],
+    blockReadyAt: now, blockLane:-1, blockUntil:0,
+    maxQueued:0, vid:0,
+    hiddenAt:0
+  };
+  const f = $('#field');
+  state.staffs.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'staff';
+    el.innerHTML = `<div class="staff-inner">${staffSVG(s.gender, 50)}</div>`;
+    const p = geo.staffPos(s.lane);
+    el.style.left = p.left + 'px';
+    el.style.top = p.top + 'px';
+    el.addEventListener('pointerdown', e => { e.stopPropagation(); selectStaff(s); });
+    f.appendChild(el);
+    s.el = el;
+  });
+  renderHearts(); updateScore(); updateHint(); updateDesks();
+  $('#time-num').textContent = '0:00';
+  sfx.start();
+  clearInterval(timerId);
+  timerId = setInterval(tick, TICK_MS);
+}
+
+function tick(){
+  if(!state || state.over || document.hidden) return;
+  const now = Date.now();
+
+  /* 来場者スポーン */
+  if(now >= state.spawnAt){
+    spawnVisitor();
+    state.spawnInterval = Math.max(SPAWN_MIN, state.spawnInterval * SPAWN_DECAY);
+    state.spawnAt = now + state.spawnInterval;
+  }
+  while(state.pending.length && now >= state.pending[0]){
+    state.pending.shift();
+    spawnVisitor();
+  }
+
+  /* 団体ウェーブ */
+  if(now >= state.nextWaveAt){
+    state.waveCount++;
+    const n = 4 + Math.min(4, Math.floor((now - state.startTime) / 45000));
+    for(let i = 0; i < n; i++) state.pending.push(now + 400 + i * 280);
+    showBanner('団体のお客様がご来場！', false);
+    sfx.wave();
+    state.nextWaveAt = now + WAVE_EVERY;
+  }
+
+  /* スタッフ処理 */
+  state.staffs.forEach(s => {
+    if(s.state === 'moving'){
+      if(now >= s.moveEnd){
+        s.state = 'idle';
+        s.el.classList.remove('moving');
+        s.procAt = now + 420;
+      }
+      return;
+    }
+    const lane = state.lanes[s.lane];
+    if(lane.queue.length > 0 && now >= s.procAt){
+      processVisitor(s.lane);
+      s.procAt = now + PROC_MS;
+    }
+  });
+
+  /* パーテーション解除 */
+  if(state.blockLane >= 0 && now >= state.blockUntil){
+    document.querySelector(`.lane-block[data-lane="${state.blockLane}"]`).classList.remove('on');
+    state.lanes[state.blockLane].blockedUntil = 0;
+    state.blockLane = -1;
+  }
+  updatePartitionBtn(now);
+
+  /* 危険レーン表示 */
+  document.querySelectorAll('.lane-zone').forEach(z => {
+    z.classList.toggle('danger', state.lanes[+z.dataset.lane].queue.length >= CAP - 2);
+  });
+
+  /* 経過時間 */
+  $('#time-num').textContent = fmtTime(now - state.startTime);
+}
+
+function fmtTime(ms){
+  const s = Math.floor(ms / 1000);
+  return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+}
+
+function spawnVisitor(){
+  const now = Date.now();
+  const open = [];
+  for(let i = 0; i < LANE_N; i++){
+    if(state.lanes[i].blockedUntil > now) continue;
+    open.push(i);
+  }
+  if(!open.length) return;
+  let total = 0;
+  const weights = open.map(i => {
+    const w = Math.pow(CAP - state.lanes[i].queue.length + 1, 2);
+    total += w; return w;
+  });
+  let r = Math.random() * total, lane = open[0];
+  for(let k = 0; k < open.length; k++){
+    r -= weights[k];
+    if(r <= 0){ lane = open[k]; break; }
+  }
+  const L = state.lanes[lane];
+  if(L.queue.length >= CAP){ pank(lane); return; }
+
+  const v = {id:++state.vid, char:newVisitorChar()};
+  const el = document.createElement('div');
+  el.className = 'visitor-mini';
+  el.innerHTML = `<div class="bob">${ghostSVG(v.char, 38)}</div>`;
+  el.style.left = (geo.W/2 - 19) + 'px';
+  el.style.top = '2px';
+  $('#field').appendChild(el);
+  v.el = el;
+  L.queue.push(v);
+  const idx = L.queue.length - 1;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const p = geo.slotPos(lane, idx);
+    el.style.left = p.left + 'px';
+    el.style.top = p.top + 'px';
+  }));
+  const queued = state.lanes.reduce((a,l) => a + l.queue.length, 0);
+  state.maxQueued = Math.max(state.maxQueued, queued);
+}
+
+function processVisitor(laneIdx){
+  const L = state.lanes[laneIdx];
+  const v = L.queue.shift();
+  if(!v) return;
+  state.score++;
+  sfx.process();
+  const el = v.el;
+  el.style.transition = 'top .4s ease-in, left .4s ease-in, opacity .4s, transform .4s';
+  el.style.top = (geo.deskTop + 8) + 'px';
+  el.style.opacity = '0';
+  el.style.transform = 'scale(.4)';
+  setTimeout(() => el.remove(), 420);
+  repositionLane(laneIdx);
+  popText('+1', geo.laneX(laneIdx) - 8, geo.deskTop - 30, false);
+  updateScore();
+}
+
+function repositionLane(laneIdx){
+  state.lanes[laneIdx].queue.forEach((v, idx) => {
+    const p = geo.slotPos(laneIdx, idx);
+    v.el.style.left = p.left + 'px';
+    v.el.style.top = p.top + 'px';
+  });
+}
+
+function pank(laneIdx){
+  state.hearts--;
+  sfx.pank();
+  renderHearts();
+  const f = $('#field');
+  f.classList.remove('flash'); void f.offsetWidth; f.classList.add('flash');
+  /* 怒って帰るおばけ */
+  const el = document.createElement('div');
+  el.className = 'visitor-mini';
+  el.style.zIndex = 19;
+  el.innerHTML = ghostSVG(newVisitorChar(), 44, true);
+  el.style.left = (geo.laneX(laneIdx) - 22) + 'px';
+  el.style.top = (geo.entH + 30) + 'px';
+  f.appendChild(el);
+  popText('パンク！', geo.laneX(laneIdx) - 30, geo.entH + 10, true);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    el.style.transition = 'top .7s ease-in, opacity .7s, transform .7s';
+    el.style.top = '-60px';
+    el.style.opacity = '0';
+    el.style.transform = 'rotate(-14deg)';
+  }));
+  setTimeout(() => el.remove(), 750);
+  if(state.hearts <= 0) endGame();
+}
+
+function popText(text, x, y, penalty){
+  const el = document.createElement('div');
+  el.className = 'float-pts' + (penalty ? ' penalty' : '');
+  el.textContent = text;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  $('#field').appendChild(el);
+  setTimeout(() => el.remove(), 680);
+}
+
+function showBanner(text, info){
+  const b = $('#banner');
+  b.textContent = text;
+  b.classList.toggle('info', !!info);
+  b.classList.remove('show'); void b.offsetWidth; b.classList.add('show');
+}
+
+/* ====================== スタッフ操作 ====================== */
+function selectStaff(s){
+  if(!state || state.over || s.state === 'moving') return;
+  if(state.selected === s){
+    state.selected = null;
+  } else {
+    state.selected = s;
+    sfx.select();
+  }
+  state.staffs.forEach(st => st.el.classList.toggle('sel', st === state.selected));
+  updateHint();
+}
+
+function commandMove(targetLane){
+  const s = state.selected;
+  if(!s || s.state === 'moving') return;
+  if(s.lane === targetLane){ deselect(); return; }
+  const other = state.staffs.find(st => st.lane === targetLane && st.state !== 'moving');
+  const otherMoving = state.staffs.find(st => st.lane === targetLane && st.state === 'moving');
+  if(otherMoving){ return; }
+  const from = s.lane;
+  moveStaff(s, targetLane);
+  if(other) moveStaff(other, from);
+  sfx.place();
+  deselect();
+}
+
+function moveStaff(s, lane){
+  s.lane = lane;
+  s.state = 'moving';
+  s.moveEnd = Date.now() + 620;
+  s.el.classList.add('moving');
+  const p = geo.staffPos(lane);
+  s.el.style.left = p.left + 'px';
+  s.el.style.top = p.top + 'px';
+  setTimeout(updateDesks, 640);
+  updateDesks();
+}
+
+function deselect(){
+  state.selected = null;
+  state.staffs.forEach(st => st.el.classList.remove('sel'));
+  updateHint();
+}
+
+function updateDesks(){
+  document.querySelectorAll('.desk').forEach(d => {
+    const lane = +d.dataset.lane;
+    const manned = state.staffs.some(s => s.lane === lane);
+    d.classList.toggle('empty-desk', !manned);
+  });
+}
+
+function updateHint(){
+  const h = $('#hint');
+  if(state && state.selected){
+    h.textContent = '移動先のレーンをタップ！';
+    h.classList.add('active');
+  } else {
+    h.textContent = 'スタッフをタップ → レーンをタップで配置がえ';
+    h.classList.remove('active');
+  }
+}
+
+$('#field').addEventListener('pointerdown', e => {
+  if(!state || state.over) return;
+  const rect = $('#field').getBoundingClientRect();
+  const lane = Math.max(0, Math.min(LANE_N - 1, Math.floor((e.clientX - rect.left) / geo.laneW)));
+  if(state.selected){
+    commandMove(lane);
+  } else {
+    const s = state.staffs.find(st => st.lane === lane && st.state !== 'moving');
+    if(s) selectStaff(s);
+  }
+});
+
+/* ====================== パーテーション ====================== */
+$('#partition-btn').addEventListener('click', () => {
+  if(!state || state.over) return;
+  const now = Date.now();
+  if(now < state.blockReadyAt || state.blockLane >= 0) return;
+  let lane = -1, best = -1;
+  for(let i = 0; i < LANE_N; i++){
+    if(state.lanes[i].queue.length > best){ best = state.lanes[i].queue.length; lane = i; }
+  }
+  if(lane < 0) return;
+  state.blockLane = lane;
+  state.blockUntil = now + BLOCK_MS;
+  state.blockReadyAt = now + BLOCK_MS + BLOCK_CD;
+  state.lanes[lane].blockedUntil = state.blockUntil;
+  document.querySelector(`.lane-block[data-lane="${lane}"]`).classList.add('on');
+  showBanner(`レーン0${lane+1}を一時ストップ！`, true);
+  sfx.partition();
+});
+
+function updatePartitionBtn(now){
+  const btn = $('#partition-btn'), label = $('#partition-label'), cd = btn.querySelector('.cd');
+  if(state.blockLane >= 0){
+    btn.disabled = true;
+    label.textContent = 'ストップ中…';
+    cd.style.width = '0%';
+  } else if(now < state.blockReadyAt){
+    btn.disabled = true;
+    const total = BLOCK_CD;
+    const remain = state.blockReadyAt - now;
+    label.textContent = `あと${Math.ceil(remain/1000)}秒`;
+    cd.style.width = (remain/total*100) + '%';
+  } else {
+    btn.disabled = false;
+    label.textContent = 'パーテーション';
+    cd.style.width = '0%';
+  }
+}
+
+/* ====================== HUD ====================== */
+function renderHearts(){
+  $('#hearts').innerHTML = [0,1,2].map(i => heartSVG(i < state.hearts)).join('');
+}
+function updateScore(){
+  $('#score-num').textContent = state.score;
+}
+
+/* ====================== 終了 ====================== */
+function endGame(){
+  state.over = true;
+  clearInterval(timerId);
+  sfx.end();
+  const dur = Date.now() - state.startTime;
+  const rank = RANKS.find(r => state.score >= r.min);
+  $('#result-rank').textContent = rank.name;
+  $('#result-score').innerHTML = state.score + '<small>人</small>';
+  $('#stat-time').textContent = fmtTime(dur);
+  $('#stat-wave').textContent = state.waveCount + '回';
+  $('#stat-max').textContent = state.maxQueued + '人';
+  $('#result-msg').textContent = rank.msg;
+  $('#result-chars').innerHTML = staffSVG('m', 64) + ghostSVG('b', 76) + ghostSVG('p', 76) + staffSVG('f', 64);
+  const best = +(localStorage.getItem('tsubox_gyoretsu_best') || 0);
+  const isNew = state.score > best;
+  if(isNew) localStorage.setItem('tsubox_gyoretsu_best', state.score);
+  $('#result-newbest').style.visibility = isNew && state.score > 0 ? 'visible' : 'hidden';
+  setTimeout(() => show('result'), 700);
+}
+
+function renderTitle(){
+  $('#title-chars').innerHTML =
+    staffSVG('m', 66) + ghostSVG('b', 84) + ghostSVG('p', 84) + staffSVG('f', 66);
+  const best = +(localStorage.getItem('tsubox_gyoretsu_best') || 0);
+  $('#best-line').innerHTML = best > 0
+    ? `ベスト記録 <b>${best}</b> 人`
+    : 'スタッフ3人で4つのレーンを守りきろう';
+}
+
+/* ====================== タブ非表示対応 ====================== */
+document.addEventListener('visibilitychange', () => {
+  if(!state || state.over) return;
+  if(document.hidden){
+    state.hiddenAt = Date.now();
+  } else if(state.hiddenAt){
+    const d = Date.now() - state.hiddenAt;
+    state.hiddenAt = 0;
+    state.startTime += d; state.spawnAt += d; state.nextWaveAt += d;
+    state.blockReadyAt += d;
+    if(state.blockUntil) state.blockUntil += d;
+    state.pending = state.pending.map(t => t + d);
+    state.lanes.forEach(l => { if(l.blockedUntil) l.blockedUntil += d; });
+    state.staffs.forEach(s => { s.procAt += d; if(s.moveEnd) s.moveEnd += d; });
+  }
+});
+
+/* ====================== 入力・初期化 ====================== */
+$('#start-btn').addEventListener('click', startGame);
+$('#retry-btn').addEventListener('click', startGame);
+$('#title-btn').addEventListener('click', () => { renderTitle(); show('title'); });
+$('#mute-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  muted = !muted;
+  localStorage.setItem('tsubox_uketsuke_mute', muted ? '1' : '0');
+  renderMuteBtn();
+  if(!muted){ ensureAudio(); beep(660,.07); }
+});
+window.addEventListener('resize', () => {
+  if(state && !state.over){
+    computeGeo();
+    state.lanes.forEach((l, i) => repositionLane(i));
+    state.staffs.forEach(s => {
+      const p = geo.staffPos(s.lane);
+      s.el.style.left = p.left + 'px';
+      s.el.style.top = p.top + 'px';
+    });
+  }
+});
+
+const eyeStyle = document.createElement('style');
+eyeStyle.textContent = `
+.g-eye{transform-box:fill-box;transform-origin:center;animation:blink 4.2s infinite}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95.5%,97%{transform:scaleY(.08)}}`;
+document.head.appendChild(eyeStyle);
+
+renderMuteBtn();
+renderTitle();
+</script>
+</body>
+</html>
